@@ -34,3 +34,6 @@
 此外还有 src/Avalonia.Build.Tasks 和 tests/Avalonia.Generators.Tests 中存在引用。
 
 反正，这暂且算是够用了。
+
+## XamlLoader
+我首先拿GeminiCLI跑了一份[代码结构报告](2025-9-16_Avalonia.Markup.Xaml.Loader-CodeStructureReport)。
