@@ -36,4 +36,4 @@
 反正，这暂且算是够用了。
 
 ## XamlLoader
-我首先拿GeminiCLI跑了一份[代码结构报告](2025-9-16_Avalonia.Markup.Xaml.Loader-CodeStructureReport)。
+我首先拿GeminiCLI跑了一份[代码结构报告](./AI_Generated_Reports/2025-9-16_Avalonia.Markup.Xaml.Loader-CodeStructureReport.md)。
