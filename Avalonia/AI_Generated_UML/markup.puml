@@ -14,10 +14,17 @@ namespace Avalonia.Markup.Xaml {
     }
 
     class RuntimeXamlLoaderConfiguration {
+        + LocalAssembly: Assembly?
+        + UseCompiledBindingsByDefault: bool = false
+        + DesignMode: bool = false
+        + DiagnosticHandler: XamlDiagnosticFunc?
     }
+
+    delegate void XamlDiagnosticFunc(int line, int position, string message)
 
     AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderDocument
     AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderConfiguration
+    RuntimeXamlLoaderConfiguration ..> XamlDiagnosticFunc
 }
 
 ' 建立伪节点代表方法
