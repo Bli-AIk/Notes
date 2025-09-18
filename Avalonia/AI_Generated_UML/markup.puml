@@ -1,7 +1,24 @@
 @startuml
 namespace Avalonia.Markup.Xaml {
-    class AvaloniaRuntimeXamlLoader
+    class AvaloniaRuntimeXamlLoader {
+        + Load1()
+        + Load2()
+        + Load3()
+    }
 }
+
+note right of AvaloniaRuntimeXamlLoader
+  Load方法重载都包含RequiresUnreferencedCode,
+  其提示信息为:
+  XamlX.TrimmingMessages.DynamicXamlReference =
+  "x:Class directive type and XAML dependencies are referenced dynamically and might be trimmed."
+end note
+
+note as N1
+  RequiresUnreferencedCode 是 .NET（尤其是 .NET 5+ 和 .NET 6/7/8）中的一个 特性（attribute），
+  用于标记某些方法或成员 在链接器（IL Linker / Trim）裁剪代码时不安全，
+  也就是说，这些代码 依赖于反射或动态访问，裁剪时可能被移除，导致运行时错误。
+end note
 
 package Avalonia.Markup.Xaml.XamlIl {
 }
