@@ -7,6 +7,10 @@ namespace Avalonia.Markup.Xaml {
     }
 
     class RuntimeXamlLoaderDocument {
+        + BaseUri: Uri?
+        + RootInstance: object?
+        + XamlStream: Stream
+        + ServiceProvider: IServiceProvider?
     }
 
     class RuntimeXamlLoaderConfiguration {
