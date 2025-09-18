@@ -1,7 +1,7 @@
 @startuml
 namespace Avalonia.Markup.Xaml {
     class AvaloniaRuntimeXamlLoader {
-        + Load1()
+        + Load1(xaml: string, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
         + Load2()
         + Load3()
     }
