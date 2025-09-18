@@ -2,10 +2,15 @@
 namespace Avalonia.Markup.Xaml {
     class AvaloniaRuntimeXamlLoader {
         + Load1(xaml: string, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
-        + Load2()
+        + Load2(stream: Stream, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
         + Load3()
     }
 }
+
+note left of AvaloniaRuntimeXamlLoader::Load1
+  var stream = new MemoryStream(Encoding.UTF8.GetBytes(xaml));
+  Load2(stream, localAssembly, rootInstance, uri, designMode);
+end note
 
 note right of AvaloniaRuntimeXamlLoader
   Load方法重载都包含RequiresUnreferencedCode,
@@ -24,4 +29,5 @@ package Avalonia.Markup.Xaml.XamlIl {
 }
 
 Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader ..> Avalonia.Markup.Xaml.XamlIl : using
+AvaloniaRuntimeXamlLoader::Load1 ..> AvaloniaRuntimeXamlLoader::Load2 : calls
 @enduml
