@@ -3,23 +3,40 @@ namespace Avalonia.Markup.Xaml {
     class AvaloniaRuntimeXamlLoader {
         + Load1(xaml: string, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
         + Load2(stream: Stream, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
-        + Load3()
+        + Load3(document: RuntimeXamlLoaderDocument, configuration: RuntimeXamlLoaderConfiguration)
     }
+
+    class RuntimeXamlLoaderDocument {
+    }
+
+    class RuntimeXamlLoaderConfiguration {
+    }
+
+    AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderDocument
+    AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderConfiguration
 }
 
 ' 建立伪节点代表方法
 entity Load1
 entity Load2
+entity Load3
 
 ' 隐藏连线，把伪节点放到类方法对应的位置
 Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load1 -[hidden]- Load1
 Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load2 -[hidden]- Load2
+Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load3 -[hidden]- Load3
 
 ' 实际箭头
 Load1 --> Load2 : 调用
+Load2 --> Load3 : 调用
 
 note right of Load1
   var stream = new MemoryStream(Encoding.UTF8.GetBytes(xaml));
+end note
+
+note right of Load2
+  new RuntimeXamlLoaderDocument(uri, rootInstance, stream)
+  new RuntimeXamlLoaderConfiguration { DesignMode = designMode, LocalAssembly = localAssembly }
 end note
 
 note right of AvaloniaRuntimeXamlLoader
