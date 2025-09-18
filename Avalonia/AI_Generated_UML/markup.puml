@@ -41,7 +41,7 @@ Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load3 -[hidden]- Load3
 
 ' 实际箭头
 Load1 --> Load2 : 调用
-Load2 --> Load3 : 调用
+Load2 --> XamlIlLoad : 调用
 Load3 --> XamlIlLoad : 调用
 
 note right of Load1
