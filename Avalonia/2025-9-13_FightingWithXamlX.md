@@ -35,7 +35,7 @@
 
 反正，这暂且算是够用了。
 
-## Markup
+## 简阅代码结构
 我首先拿GeminiCLI跑了四份代码结构报告：
 - [AvaloniaMarkupDirectory](./AI_Generated_Reports/2025-9-16_AvaloniaMarkupDirectory-CodeStructureReport.md)
 - [Avalonia.Markup](./AI_Generated_Reports/2025-9-16_Avalonia.Markup-CodeStructureReport.md)
@@ -49,4 +49,7 @@
 以及，源码里面是可以进行断点测试的。
 
 嗯，反正这样也能模模糊糊的把它大概在干啥梳理一遍吧，那我们下一步就是来复现它。
+
+## 复现
+复现仓库见 [XamlXSample](https://github.com/Bli-AIk/XamlXSample).
 
