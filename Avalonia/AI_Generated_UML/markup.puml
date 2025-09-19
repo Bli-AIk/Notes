@@ -113,4 +113,28 @@ package Avalonia.Markup.Xaml.XamlIl {
     }
     AvaloniaXamlIlRuntimeCompiler ..> SreTypeSystem : Creates
 }
+
+package System.Reflection.Emit {
+    class TypeBuilder {
+    }
+}
+
+package Avalonia.Markup.Xaml.XamlIl {
+    interface IXamlAssembly {
+    }
+}
+
+
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> System.Reflection.Emit.TypeBuilder : Uses
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> Avalonia.Markup.Xaml.XamlIl.IXamlAssembly : Uses
+
+note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+  第一步：
+  - 得到变量IXamlAssembly? asm。
+  - 定义三个TypeBuilder
+    - clrPropertyBuilder：容器类型
+    - indexerClosureType：处理索引器绑定
+    - trampolineBuilder：生成各种中转方法
+end note
+
 @enduml
