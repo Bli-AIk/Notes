@@ -97,7 +97,7 @@ entity AvaloniaXamlIlRuntimeCompiler_InitializeSre
 Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler::InitializeSre -[hidden]- AvaloniaXamlIlRuntimeCompiler_InitializeSre
 AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore --> AvaloniaXamlIlRuntimeCompiler_InitializeSre : 调用
 
-note right of AvaloniaXamlIlRuntimeCompiler_InitializeSre
+note left of AvaloniaXamlIlRuntimeCompiler_InitializeSre
   InitializeSre会进行以下操作：
   - 保证相关程序集GC.KeepAlive
   - 进行初始化：
@@ -129,12 +129,24 @@ Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> System.Reflection.
 Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> Avalonia.Markup.Xaml.XamlIl.IXamlAssembly : Uses
 
 note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
-  第一步：
+  第一步 (初始化定义) :
   - 得到变量IXamlAssembly? asm。
+	如果有本地程序集，asm的内容就是内部表示。
+	否则就是null。
   - 定义三个TypeBuilder
     - clrPropertyBuilder：容器类型
     - indexerClosureType：处理索引器绑定
     - trampolineBuilder：生成各种中转方法
+end note
+
+note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+  第二步 (诊断处理) :
+  - 定义List<XamlDiagnostic> diagnostics 以储存警告 / 错误等诊断信息
+  - 定义XamlDiagnosticsHandler 用于接收并转换诊断消息
+	- 将 XamlX 的 Diagnostic 转换为 Avalonia 运行时可用的 RuntimeXamlDiagnostic
+	- 如果外部配置了 DiagnosticHandler，则允许用户覆盖诊断级别
+	- 更新诊断的严重程度 并 将诊断结果保存到 diagnostics 中
+	- 将底层 XamlX 的诊断码映射到 Avalonia 的诊断码
 end note
 
 @enduml
