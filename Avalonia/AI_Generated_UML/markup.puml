@@ -1,0 +1,183 @@
+@startuml
+namespace Avalonia.Markup.Xaml {
+    class AvaloniaRuntimeXamlLoader {
+        + Load1(xaml: string, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
+        + Load2(stream: Stream, localAssembly: Assembly, rootInstance: object, uri: Uri, designMode: bool)
+        + Load3(document: RuntimeXamlLoaderDocument, configuration: RuntimeXamlLoaderConfiguration)
+    }
+
+    class RuntimeXamlLoaderDocument {
+        + BaseUri: Uri?
+        + RootInstance: object?
+        + XamlStream: Stream
+        + ServiceProvider: IServiceProvider?
+    }
+
+    class RuntimeXamlLoaderConfiguration {
+        + LocalAssembly: Assembly?
+        + UseCompiledBindingsByDefault: bool = false
+        + DesignMode: bool = false
+        + DiagnosticHandler: XamlDiagnosticFunc?
+        + XamlDiagnosticFunc(int line, int position, string message)
+    }
+
+    AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderDocument
+    AvaloniaRuntimeXamlLoader ..> RuntimeXamlLoaderConfiguration
+    RuntimeXamlLoaderConfiguration ..> XamlDiagnosticFunc
+}
+
+' 建立伪节点代表方法
+entity AvaloniaRuntimeXamlLoader_Load1 {
+  var stream = new MemoryStream(Encoding.UTF8.GetBytes(xaml));
+}
+entity AvaloniaRuntimeXamlLoader_Load2 {
+  new RuntimeXamlLoaderDocument(uri, rootInstance, stream)
+  new RuntimeXamlLoaderConfiguration { DesignMode = designMode, LocalAssembly = localAssembly }
+}
+entity AvaloniaRuntimeXamlLoader_Load3
+entity AvaloniaXamlIlRuntimeCompiler_Load
+entity AvaloniaXamlIlRuntimeCompiler_LoadCecil
+entity AvaloniaXamlIlRuntimeCompiler_LoadSre
+entity AvaloniaXamlIlRuntimeCompiler_LoadSreCore
+entity AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+
+' 隐藏连线，把伪节点放到类方法对应的位置
+Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load1 -[hidden]- AvaloniaRuntimeXamlLoader_Load1
+Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load2 -[hidden]- AvaloniaRuntimeXamlLoader_Load2
+Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader::Load3 -[hidden]- AvaloniaRuntimeXamlLoader_Load3
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler::Load -[hidden]- AvaloniaXamlIlRuntimeCompiler_Load
+
+' 实际箭头
+AvaloniaRuntimeXamlLoader_Load1 --> AvaloniaRuntimeXamlLoader_Load2 : 调用
+AvaloniaRuntimeXamlLoader_Load2 --> AvaloniaXamlIlRuntimeCompiler_Load : 调用
+AvaloniaRuntimeXamlLoader_Load3 --> AvaloniaXamlIlRuntimeCompiler_Load : 调用
+AvaloniaXamlIlRuntimeCompiler_Load --> AvaloniaXamlIlRuntimeCompiler_LoadCecil : if RUNTIME_XAML_CECIL
+AvaloniaXamlIlRuntimeCompiler_Load --> AvaloniaXamlIlRuntimeCompiler_LoadSre : else
+AvaloniaXamlIlRuntimeCompiler_LoadSre --> AvaloniaXamlIlRuntimeCompiler_LoadSreCore
+AvaloniaXamlIlRuntimeCompiler_LoadSreCore --> AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+
+note right of AvaloniaRuntimeXamlLoader
+  Load方法重载都包含RequiresUnreferencedCode,
+  其提示信息为:
+  XamlX.TrimmingMessages.DynamicXamlReference =
+  "x:Class directive type and XAML dependencies are referenced dynamically and might be trimmed."
+end note
+
+note as N1
+  RequiresUnreferencedCode 是 .NET（尤其是 .NET 5+ 和 .NET 6/7/8）中的一个 特性（attribute），
+  用于标记某些方法或成员 在链接器（IL Linker / Trim）裁剪代码时不安全，
+  也就是说，这些代码 依赖于反射或动态访问，裁剪时可能被移除，导致运行时错误。
+end note
+
+note right of AvaloniaXamlIlRuntimeCompiler_Load
+  Load方法中，
+  会检测是否启用RUNTIME_XAML_CECIL。
+  如果启用，则 return LoadCecil
+  (xaml, configuration.LocalAssembly, 
+  document.RootInstance, document.BaseUri, 
+  configuration.UseCompiledBindingsByDefault);
+  否则，
+  return LoadSre(document, configuration);
+end note
+
+package Avalonia.Markup.Xaml.XamlIl {
+    class AvaloniaXamlIlRuntimeCompiler {
+        + Load(document: RuntimeXamlLoaderDocument, configuration: RuntimeXamlLoaderConfiguration)
+        + LoadSre(document: RuntimeXamlLoaderDocument, configuration: RuntimeXamlLoaderConfiguration)
+        + LoadSreCore(document: RuntimeXamlLoaderDocument, configuration: RuntimeXamlLoaderConfiguration)
+        + LoadGroupSreCore(documents: IReadOnlyCollection<RuntimeXamlLoaderDocument>, configuration: RuntimeXamlLoaderConfiguration)
+        + LoadCecil(xaml: string, localAssembly: Assembly, rootInstance: object, uri: Uri, useCompiledBindingsByDefault: bool)
+        + InitializeSre()
+    }
+}
+
+Avalonia.Markup.Xaml.AvaloniaRuntimeXamlLoader ..> Avalonia.Markup.Xaml.XamlIl : using
+
+entity AvaloniaXamlIlRuntimeCompiler_InitializeSre
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler::InitializeSre -[hidden]- AvaloniaXamlIlRuntimeCompiler_InitializeSre
+AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore --> AvaloniaXamlIlRuntimeCompiler_InitializeSre : 调用
+
+note left of AvaloniaXamlIlRuntimeCompiler_InitializeSre
+  InitializeSre会进行以下操作：
+  - 保证相关程序集GC.KeepAlive
+  - 进行初始化：
+    - 创建 SreTypeSystem
+    - 生成动态程序集和模块
+    - 配置 XAML 的类型/命名空间映射
+    - 生成上下文类型
+    - 定义辅助的访问检查 attribute
+end note
+
+package Avalonia.Markup.Xaml.XamlIl {
+    class SreTypeSystem {
+    }
+    AvaloniaXamlIlRuntimeCompiler ..> SreTypeSystem : Creates
+}
+
+package System.Reflection.Emit {
+    class TypeBuilder {
+    }
+}
+
+package Avalonia.Markup.Xaml.XamlIl {
+    interface IXamlAssembly {
+    }
+}
+
+
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> System.Reflection.Emit.TypeBuilder : Uses
+Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> Avalonia.Markup.Xaml.XamlIl.IXamlAssembly : Uses
+
+note as LoadGroupSreCore_n1
+  第一步 (初始化定义) :
+  - 得到变量IXamlAssembly? asm。
+        如果有本地程序集，asm的内容就是内部表示。
+        否则就是null。
+  - 定义三个TypeBuilder
+    - clrPropertyBuilder：容器类型
+    - indexerClosureType：处理索引器绑定
+    - trampolineBuilder：生成各种中转方法
+end note
+
+note as LoadGroupSreCore_n2
+  第二步 (诊断处理) :
+  - 定义List<XamlDiagnostic> diagnostics 以储存警告 / 错误等诊断信息
+  - 定义XamlDiagnosticsHandler 用于接收并转换诊断消息
+        - 将 XamlX 的 Diagnostic 转换为 Avalonia 运行时可用的 RuntimeXamlDiagnostic
+        - 如果外部配置了 DiagnosticHandler，则允许用户覆盖诊断级别
+        - 更新诊断的严重程度 并 将诊断结果保存到 diagnostics 中
+        - 将底层 XamlX 的诊断码映射到 Avalonia 的诊断码
+end note
+
+note as LoadGroupSreCore_n3
+  第三步 (创建编译器) :
+  - 创建 AvaloniaXamlIlCompiler 实例，用于将 XAML 编译成运行时可执行 IL
+        - 启用 IL 验证
+        - 使用默认编译绑定设置
+        - 使用默认设计模式设置
+  AvaloniaXamlIlCompiler 的构造函数定义了一整条“编译管线”。
+end note
+
+note as LoadGroupSreCore_n4
+  第四步 (解析 → 转换 → 即时编译 XAML) :
+  - 收集解析后的文档和原始输入文档以便后续处理与映射
+  - 逐个读取 XAML，解析、转换，并为每个文档准备动态 TypeBuilder 与对应的 TypeBuilderProvider
+        - 读取 XAML 文本
+        - 如果传入了已有的根实例，则把它的类型作为解析时的覆盖类型
+        - 解析并对单个文档做语法树变换
+        - 决定用于命名 TypeBuilder 的友好名称（优先 Uri，再根实例类型名，最后用解析结果的根类型名）
+        - 在动态模块中为该文档创建一个唯一的类型占位符
+        - 将解析后的文档包装为 XamlDocumentResource，并提供延迟创建的 TypeBuilderProvider（包含 Populate/Build 方法）
+        - 保存原始文档以便在生成类型后进行加载/填充
+  - 对文档组执行全局转换（例如处理跨文档引用/资源等）
+  - 如果存在错误级别的诊断则抛出异常以中止流程
+  - 为每个解析文档编译生成类型并创建运行时类型表示
+  - 完成辅助类型的固化（属性容器、索引器闭包、跳板）
+  - 根据生成的类型与原始文档，加载或填充实例并返回结果数组
+end note
+
+AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore --> LoadGroupSreCore_n1
+LoadGroupSreCore_n1 --> LoadGroupSreCore_n2
+LoadGroupSreCore_n2 --> LoadGroupSreCore_n3
+LoadGroupSreCore_n3 --> LoadGroupSreCore_n4
+@enduml
