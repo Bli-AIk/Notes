@@ -35,5 +35,18 @@
 
 反正，这暂且算是够用了。
 
-## XamlLoader
-我首先拿GeminiCLI跑了一份[代码结构报告](./AI_Generated_Reports/2025-9-16_Avalonia.Markup.Xaml.Loader-CodeStructureReport.md)。
+## Markup
+我首先拿GeminiCLI跑了四份代码结构报告：
+- [AvaloniaMarkupDirectory](./AI_Generated_Reports/2025-9-16_AvaloniaMarkupDirectory-CodeStructureReport.md)
+- [Avalonia.Markup](./AI_Generated_Reports/2025-9-16_Avalonia.Markup-CodeStructureReport.md)
+- [Avalonia.Markup.Xaml](./AI_Generated_Reports/2025-9-16_Avalonia.Markup.Xaml-CodeStructureReport.md)
+- [Avalonia.Markup.Xaml.Loader](./AI_Generated_Reports/2025-9-16_Avalonia.Markup.Xaml.Loader-CodeStructureReport.md)
+
+然后边拿uml图做笔记边梳理结构。不管怎样，一图胜千言。虽然这个图不是很正规吧，但我也并非不是什么野路子。
+
+![PUML](./AI_Generated_UML/puml.png)
+
+以及，源码里面是可以进行断点测试的。
+
+嗯，反正这样也能模模糊糊的把它大概在干啥梳理一遍吧，那我们下一步就是来复现它。
+
