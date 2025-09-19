@@ -128,7 +128,7 @@ package Avalonia.Markup.Xaml.XamlIl {
 Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> System.Reflection.Emit.TypeBuilder : Uses
 Avalonia.Markup.Xaml.XamlIl.AvaloniaXamlIlRuntimeCompiler ..> Avalonia.Markup.Xaml.XamlIl.IXamlAssembly : Uses
 
-note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+note as LoadGroupSreCore_n1
   第一步 (初始化定义) :
   - 得到变量IXamlAssembly? asm。
 	如果有本地程序集，asm的内容就是内部表示。
@@ -139,7 +139,7 @@ note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
     - trampolineBuilder：生成各种中转方法
 end note
 
-note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
+note as LoadGroupSreCore_n2
   第二步 (诊断处理) :
   - 定义List<XamlDiagnostic> diagnostics 以储存警告 / 错误等诊断信息
   - 定义XamlDiagnosticsHandler 用于接收并转换诊断消息
@@ -148,5 +148,36 @@ note left of AvaloniaXamlIlRuntimeCompiler_LoadGroupSreCore
 	- 更新诊断的严重程度 并 将诊断结果保存到 diagnostics 中
 	- 将底层 XamlX 的诊断码映射到 Avalonia 的诊断码
 end note
+
+note as LoadGroupSreCore_n3
+  第三步 (创建编译器) :
+  - 创建 AvaloniaXamlIlCompiler 实例，用于将 XAML 编译成运行时可执行 IL
+	- 启用 IL 验证
+	- 使用默认编译绑定设置
+	- 使用默认设计模式设置
+  AvaloniaXamlIlCompiler 的构造函数定义了一整条“编译管线”。
+end note
+
+note as LoadGroupSreCore_n4
+  第四步 (解析 → 转换 → 即时编译 XAML) :
+  - 收集解析后的文档和原始输入文档以便后续处理与映射
+  - 逐个读取 XAML，解析、转换，并为每个文档准备动态 TypeBuilder 与对应的 TypeBuilderProvider
+	- 读取 XAML 文本
+	- 如果传入了已有的根实例，则把它的类型作为解析时的覆盖类型
+	- 解析并对单个文档做语法树变换
+	- 决定用于命名 TypeBuilder 的友好名称（优先 Uri，再根实例类型名，最后用解析结果的根类型名）
+	- 在动态模块中为该文档创建一个唯一的类型占位符
+	- 将解析后的文档包装为 XamlDocumentResource，并提供延迟创建的 TypeBuilderProvider（包含 Populate/Build 方法）
+	- 保存原始文档以便在生成类型后进行加载/填充
+  - 对文档组执行全局转换（例如处理跨文档引用/资源等）
+  - 如果存在错误级别的诊断则抛出异常以中止流程
+  - 为每个解析文档编译生成类型并创建运行时类型表示
+  - 完成辅助类型的固化（属性容器、索引器闭包、跳板）
+  - 根据生成的类型与原始文档，加载或填充实例并返回结果数组
+end note
+
+LoadGroupSreCore_n1 --> LoadGroupSreCore_n2
+LoadGroupSreCore_n2 --> LoadGroupSreCore_n3
+LoadGroupSreCore_n3 --> LoadGroupSreCore_n4
 
 @enduml
