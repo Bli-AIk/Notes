@@ -47,12 +47,16 @@ XamlIlLoad --> LoadCecil : if RUNTIME_XAML_CECIL
 XamlIlLoad --> LoadSre : else
 
 note right of Load1
-  var stream = new MemoryStream(Encoding.UTF8.GetBytes(xaml));
+  var stream = new MemoryStream
+  (Encoding.UTF8.GetBytes(xaml));
 end note
 
 note right of Load2
-  new RuntimeXamlLoaderDocument(uri, rootInstance, stream)
-  new RuntimeXamlLoaderConfiguration { DesignMode = designMode, LocalAssembly = localAssembly }
+  new RuntimeXamlLoaderDocument
+  (uri, rootInstance, stream)
+  new RuntimeXamlLoaderConfiguration 
+  { DesignMode = designMode, 
+  LocalAssembly = localAssembly }
 end note
 
 note right of AvaloniaRuntimeXamlLoader
@@ -69,9 +73,14 @@ note as N1
 end note
 
 note right of XamlIlLoad
-  XAMLILLoad方法中，会检测是否启用RUNTIME_XAML_CECIL。
-  如果启用，则 return LoadCecil();
-  否则，return LoadSre();
+  XAMLILLoad方法中，
+  会检测是否启用RUNTIME_XAML_CECIL。
+  如果启用，则 return LoadCecil
+  (xaml, configuration.LocalAssembly, 
+  document.RootInstance, document.BaseUri, 
+  configuration.UseCompiledBindingsByDefault);
+  否则，
+  return LoadSre(document, configuration);
 end note
 
 package Avalonia.Markup.Xaml.XamlIl {
