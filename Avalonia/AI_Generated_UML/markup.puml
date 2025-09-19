@@ -27,8 +27,13 @@ namespace Avalonia.Markup.Xaml {
 }
 
 ' 建立伪节点代表方法
-entity AvaloniaRuntimeXamlLoader_Load1
-entity AvaloniaRuntimeXamlLoader_Load2
+entity AvaloniaRuntimeXamlLoader_Load1 {
+  var stream = new MemoryStream(Encoding.UTF8.GetBytes(xaml));
+}
+entity AvaloniaRuntimeXamlLoader_Load2 {
+  new RuntimeXamlLoaderDocument(uri, rootInstance, stream)
+  new RuntimeXamlLoaderConfiguration { DesignMode = designMode, LocalAssembly = localAssembly }
+}
 entity AvaloniaRuntimeXamlLoader_Load3
 entity AvaloniaXamlIlRuntimeCompiler_Load
 entity AvaloniaXamlIlRuntimeCompiler_LoadCecil
@@ -45,19 +50,6 @@ AvaloniaRuntimeXamlLoader_Load2 --> AvaloniaXamlIlRuntimeCompiler_Load : 调用
 AvaloniaRuntimeXamlLoader_Load3 --> AvaloniaXamlIlRuntimeCompiler_Load : 调用
 AvaloniaXamlIlRuntimeCompiler_Load --> AvaloniaXamlIlRuntimeCompiler_LoadCecil : if RUNTIME_XAML_CECIL
 AvaloniaXamlIlRuntimeCompiler_Load --> AvaloniaXamlIlRuntimeCompiler_LoadSre : else
-
-note right of AvaloniaRuntimeXamlLoader_Load1
-  var stream = new MemoryStream
-  (Encoding.UTF8.GetBytes(xaml));
-end note
-
-note right of AvaloniaRuntimeXamlLoader_Load2
-  new RuntimeXamlLoaderDocument
-  (uri, rootInstance, stream)
-  new RuntimeXamlLoaderConfiguration 
-  { DesignMode = designMode, 
-  LocalAssembly = localAssembly }
-end note
 
 note right of AvaloniaRuntimeXamlLoader
   Load方法重载都包含RequiresUnreferencedCode,
